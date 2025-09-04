@@ -27,7 +27,7 @@ public class FizzBuzz {
 
     public static boolean isPrime(int num) {
         boolean status = true;
-        if (num == 1 || num<1) {
+        if (num <=1) {
             return false;
         }
         int sqrtNum = (int) Math.sqrt(num);
