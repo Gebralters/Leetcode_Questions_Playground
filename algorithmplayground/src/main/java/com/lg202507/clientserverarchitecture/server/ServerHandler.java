@@ -32,22 +32,41 @@ public class ServerHandler implements Runnable{
     public void run() {
         while (running) {
            String response1=receiveText();
-            String strarray = response1.substring(5);
+            if (response1.equals("image")) {
+                sendText("200 OK");
 
-
-            System.out.println(strarray);
-            if (response1.contains("NAME")) {
-              sendText("letheba");
+                String fileSize=receiveText();
+                System.out.println(response1);
+                int fileint= Integer.parseInt(fileSize);
+                System.out.println("File size received filesize:"+fileint);
+                try {
+                    receiveData(fileint);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                System.out.println("file received");
             }
-            String response2=receiveText();
-            if (response2.contains("SURNAME")) {
-                sendText("kaka");
-            }
+            sendText("OK");
+            running=false;
         }
         closeConnection();
         System.out.println("Connection Closed");
     }
 
+    private void receiveData(int fileSize) throws IOException {
+        File fileToDownLoad = new File("src/main/resource/server/letheba.png");
+        FileOutputStream fos = new FileOutputStream(fileToDownLoad); //to write the incoming data to disk
+        byte[] buffer = new byte[1024];
+        int n=0;
+        int totalbytes = 0;
+        while(totalbytes!=fileSize)
+        {
+            n= din.read(buffer,0, buffer.length);
+            fos.write(buffer,0,n);
+            fos.flush();
+            totalbytes+=n;
+        }
+    }
     private void sendText(String message) {
         pr.println(message);
         pr.flush();

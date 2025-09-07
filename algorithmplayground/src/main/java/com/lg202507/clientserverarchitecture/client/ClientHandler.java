@@ -2,6 +2,7 @@ package com.lg202507.clientserverarchitecture.client;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class ClientHandler {
     private Socket sc=null;
@@ -25,17 +26,31 @@ public class ClientHandler {
         }
     }
 
-    public void run() {
+    public void run() throws IOException {
         while (running) {
+            System.out.println("Please enter 'image' if you want to send the image to the server");
+            Scanner sc = new Scanner(System.in);
+            String prompt=sc.nextLine();
+            sendText(prompt);
+            String response=receiveText();
+            System.out.println(response);
 
+            if (response.contains("200 OK")) {
+                System.out.println("Sending the file");
+               File file=new File("src/main/resource/client/letheba.png");
+                System.out.println(file.exists());
+                if (file.exists()) {
+                    System.out.println("file in being sent name:"+file.getName());
+                    sendText(String.valueOf(file.length()));
+                    sendfile(file);
+                }
+            }
+            System.out.println("file sent");
 
-            sendText("NAME/200");
-            String response1=receiveText();
-            System.out.println(response1);
-            sendText("SURNAME");
             String response2=receiveText();
-            System.out.println(response2);
-            running=false;
+            if (response2.equals("OK")) {
+                running=false;
+            }
         }
         closeConnection();
     }
@@ -63,20 +78,18 @@ public class ClientHandler {
 //    public void sendPdf(File file) {
 //        sendfile(file);
 //    }
-//   public void sendfile(File image) {
-//       fos = new FileOutputStream(image); //to write the incoming data to disk
-//       byte[] buffer = new byte[1024];
-//       int n=0;
-//       int totalbytes = 0;
-//       while(totalbytes!=fileSize)
-//       {
-//           n= din.read(buffer,0, buffer.length);
-//           fos.write(buffer,0,n);
-//           fos.flush();
-//           totalbytes+=n;
-//       }
-//
-//   }
+   public void sendfile(File image) throws IOException {
+       FileInputStream fis = new FileInputStream(image);
+       byte[] buffer = new byte[2048];
+       int n = 0;
+       while((n = fis.read(buffer))>0)
+       {
+           dout.write(buffer,0,n);
+           dout.flush();
+       }
+       fis.close();
+
+   }
     public void closeConnection() {
         try {
             sc.close();
